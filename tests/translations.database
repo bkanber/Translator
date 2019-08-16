@@ -1,0 +1,20 @@
+[
+  {"language": "en", "key": "page_title", "content": "English Page Title"},
+  {"language": "es", "key": "page_title", "content": "Spanish Page Title"},
+  {"language": "en", "key": "h1_classname", "content": "title-en"},
+  {"language": "es", "key": "h1_classname", "content": "title-es"},
+  {"language": "en", "key": "img_src", "content": "https://example.com/image-en.jpg"},
+  {"language": "es", "key": "img_src", "content": "https://example.com/image-es.jpg"},
+  {"language": "en", "key": "no_default", "content": "No Default English"},
+  {"language": "es", "key": "no_default", "content": "No Default Spanish"},
+  {"language": "es", "key": "intro_text", "content": "Intro in Spanish"},
+
+
+  {"language": "en", "key": "error_status", "content": "There was an error"},
+  {"language": "es", "key": "error_status", "content": "Uno error por favor"},
+  {"language": "en", "key": "item0_desc", "content": "Item description goes here"},
+  {"language": "es", "key": "item0_desc", "content": "Item description en espanol"},
+  {"language": "es", "key": "childValue", "content": "la palapa"},
+  {"language": "en", "key": "deep_nested", "content": "deep nested in english"},
+  {"language": "es", "key": "deep_nested", "content": "deep nested in spanish"}
+]

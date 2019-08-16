@@ -1,0 +1,20 @@
+{
+    "name": "bkanber/translator",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "bkanber\\Translator\\": "src/",
+            "bkanber\\Translator\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7"
+    },
+    "authors": [
+        {
+            "name": "Burak Kanber",
+            "email": "burak@burakkanber.com"
+        }
+    ],
+    "require": {}
+}

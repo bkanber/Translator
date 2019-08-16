@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "error": "__{{error_status, 'We encountered an error'}}"
+  },
+  "data": {
+    "items": [
+      {
+        "key": "item-0",
+        "desc": "__{{item0_desc}}"
+      },
+      {
+        "key": "item-1",
+        "desc": "Nested Item",
+        "children": [
+          {
+            "type": "child",
+            "value": "__{{childValue,'Default Child'}}",
+            "subobject": {
+              "middle": {
+                "end": "__{{deep_nested}}"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
