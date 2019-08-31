@@ -16,5 +16,8 @@
             "email": "burak@burakkanber.com"
         }
     ],
-    "require": {}
+    "require": {
+      "ext-pdo": "*",
+        "robmorgan/phinx": "^0.11.1"
+    }
 }

@@ -3,6 +3,10 @@
 
 namespace bkanber\Translator;
 
+use bkanber\Translator\Driver\DriverInterface;
+use bkanber\Translator\Exception\DriverMissingException;
+use bkanber\Translator\Parser\ParserInterface;
+use bkanber\Translator\Parser\StringParser;
 
 /**
  * Class Translator
@@ -26,116 +30,136 @@ namespace bkanber\Translator;
 class Translator
 {
 
+    /** @var array */
+    protected static $instances = [];
+
     /** @var string */
-    protected $language;
-    /** @var TranslationsDatabase */
-    protected $database;
+    protected $domain;
+
+    /** @var string */
+    protected $locale;
+
+    /** @var DriverInterface */
+    protected $driver;
+
+    /**
+     * Singleton instance manager.
+     *
+     * @param string $name
+     * @return static
+     */
+    public static function instance($name = 'default')
+    {
+        if (isset(self::$instances[$name])) {
+            return self::$instances[$name];
+        }
+
+        self::$instances[$name] = new self();
+
+        return self::$instances[$name];
+    }
 
     /**
      * Translator constructor.
-     * @param $language
-     * @param $database
+     * @param DriverInterface|null $driver
      */
-    public function __construct($language, $database)
+    public function __construct(DriverInterface $driver = null)
     {
-        $this->language = $language;
-        $this->database = $database;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getLanguage()
-    {
-        return $this->language;
-    }
-
-    /**
-     * @param string $language
-     */
-    public function setLanguage($language)
-    {
-        $this->language = $language;
-    }
-
-    /**
-     * @return TranslationsDatabase
-     */
-    public function getDatabase()
-    {
-        return $this->database;
-    }
-
-    /**
-     * @param TranslationsDatabase $database
-     */
-    public function setDatabase($database)
-    {
-        $this->database = $database;
+        $this->driver = $driver;
     }
 
 
     /**
-     * Parses a string and returns translatable items
+     * @return string
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @param string $domain
+     * @return static
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocale()
+    {
+        return $this->locale;
+    }
+
+    /**
+     * @param string $locale
+     * @return static
+     */
+    public function setLocale($locale)
+    {
+        $this->locale = $locale;
+        return $this;
+    }
+
+    /**
+     * @return DriverInterface
+     */
+    public function getDriver()
+    {
+        return $this->driver;
+    }
+
+    /**
+     * @param DriverInterface $driver
+     * @return static
+     */
+    public function setDriver($driver)
+    {
+        $this->driver = $driver;
+        return $this;
+    }
+
+
+    /**
      * @param $input
-     * @return array
+     * @param ParserInterface $parser
+     * @return mixed
+     * @throws DriverMissingException
      */
-    public function findTranslatables($input)
+    public function translateCustom($input, ParserInterface $parser)
     {
-        /**
-         * matches[0] is full translation markup
-         * matches[1] is translation keys
-         * matches[2] is default stanza
-         * matches[3] is default content
-         */
-        preg_match_all('/__{{(.*?)(,\s*[\'"](.*?)[\'"])?}}/', $input, $matches);
-
-        $translatables = [];
-
-        foreach ($matches[0] as $index => $match) {
-            $translatables[] = [
-                'replace' => $match,
-                'key' => $matches[1][$index],
-                'default' => $matches[3][$index]
-            ];
+        if (!$this->getDriver()) {
+            throw new DriverMissingException("Translator has not yet been configured with a data driver.");
         }
 
-        return $translatables;
+        $parser->setInput($input);
+        $translatables = $parser->parse();
+
+        // We get all keys at once so we can perform on DB query instead of many.
+        $translationKeys = $parser->getTranslatableKeys();
+        $translations = $this->getDriver()->findTranslations($this->getLocale(), $translationKeys, $this->getDomain());
+
+        return $parser->replace($translations);
     }
 
     /**
      * @param $input
      * @return mixed
+     * @throws DriverMissingException
      */
     public function translateString($input)
     {
-
-        $translatables = $this->findTranslatables($input);
-        $output = $input;
-
-        foreach ($translatables as $translatable) {
-
-            $translation = $this->getDatabase()->findTranslation($this->getLanguage(), $translatable['key']);
-            $replacement = '';
-
-            // Found a translation entry, so translate it
-            if ($translation) {
-                $replacement = $translation->getContent();
-            }
-            // No translation entry, but the translation markup had a default
-            elseif (isset($translatable['default']) && $translatable['default']) {
-                $replacement = $translatable['default'];
-            }
-
-            $output = str_replace($translatable['replace'], $replacement, $output);
-        }
-
-        return $output;
+        return $this->translateCustom($input, new StringParser());
     }
 
     /**
      * @param array $input
      * @return mixed
+     * @throws DriverMissingException
      */
     public function translateArray(array $input)
     {

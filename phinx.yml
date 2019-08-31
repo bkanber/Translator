@@ -1,0 +1,9 @@
+paths:
+    migrations: '%%PHINX_CONFIG_DIR%%/dist/migrations'
+    seeds: '%%PHINX_CONFIG_DIR%%/dist/seeds'
+
+environments:
+    default_migration_table: phinxlog
+    default_database: development
+
+version_order: creation
