@@ -2,7 +2,9 @@
 
 namespace bkanber\Translator\Tests\Driver;
 
+use bkanber\Translator\Driver\PdoDriver;
 use bkanber\Translator\Translation;
+use bkanber\Translator\Translator;
 
 /**
  * Class PdoDriverTest
@@ -178,5 +180,14 @@ class PdoDriverTest extends AbstractPdoDriverTest
         self::assertEquals(2, $this->countRows());
         self::assertNull(self::$driver->findTranslation('test', 'delete', null));
         self::assertNull(self::$driver->findTranslation('test', 'delete', 'd1'));
+    }
+
+    /**
+     * @expectedException \PDOException
+     */
+    public function testFailsIfWrongTableName()
+    {
+        $driver = new PdoDriver(self::$pdo, 'badtable');
+        $driver->createTranslation('en', 'hi', 'test', 'test');
     }
 }

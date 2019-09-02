@@ -9,6 +9,58 @@ use bkanber\Translator\Translation;
 /**
  * Class ArrayDriver
  * @package bkanber\Translator\Driver
+ *
+ * This class allows you to load a translations catalog in-memory, without using a database datastore.
+ * There are several ways to instantiate this driver, depending on your needs.
+ *
+ * Adding translations one at a time:
+ *
+ * ```php
+ * $driver = new ArrayDriver();
+ *
+ * $driver->createTranslation($locale, $key, $domain, $content);
+ * $driver->createTranslation($locale, $key, $domain, $content);
+ * // etc...
+ *
+ * $translator = new Translator($driver);
+ * ```
+ *
+ * You can add translations after the Translator has been instantiated:
+ *
+ * ```php
+ * $translator = new Translator(new ArrayDriver());
+ *
+ * $translator->getDriver()->createTranslation( ... );
+ * ```
+ *
+ * You can generate Translation instances and use setTranslations:
+ *
+ * ```
+ * $driver = new ArrayDriver();
+ *
+ * $translations = [
+ *     new Translation($locale, $key, $content, $domain),
+ *     new Translation($locale, $key, $content, $domain),
+ *     new Translation($locale, $key, $content, $domain)
+ * ];
+ *
+ * $driver->setTranslations($translations);
+ * ```
+ *
+ * Or you can use the static createFromArray method:
+ *
+ * ```php
+ *
+ * $translator = new Translator(ArrayDriver::createFromArray([
+ *     ['locale' => 'en', 'key' => 'foo', 'content' => 'bar', 'domain' => 'cust1'],
+ *     ['locale' => 'en', 'key' => 'foo', 'content' => 'bar'],
+ *     ['locale' => 'en', 'key' => 'foo', 'content' => 'bar'],
+ *     // ... etc
+ * ]));
+ *
+ * ```
+ *
+ * Locale, key, and content are all required for Translations. Only domain is optional.
  */
 class ArrayDriver implements DriverInterface
 {

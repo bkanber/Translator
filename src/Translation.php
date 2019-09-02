@@ -11,7 +11,9 @@ use bkanber\Translator\Exception\MalformedTranslationException;
  * @package bkanber\Translator
  *
  * This class represents a database model, a representation of a single key/value translation in a single language.
- * Normally this data would be stored in the DB.
+ * The data is accessed by a Driver, and the Driver is responsible for hydrating and returning these Translation objects.
+ *
+ * This class itself is not "smart" or connected to an ORM; it is more like a 'struct' and simply provides a structured object shape for Translations.
  */
 class Translation
 {

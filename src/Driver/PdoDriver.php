@@ -10,6 +10,8 @@ use bkanber\Translator\Translation;
 /**
  * Class PdoDriver
  * @package bkanber\Translator\Driver
+ *
+ *
  */
 class PdoDriver implements DriverInterface
 {
@@ -17,13 +19,18 @@ class PdoDriver implements DriverInterface
     /** @var \PDO */
     protected $pdo;
 
+    /** @var string  */
+    protected $table = 'translations';
+
     /**
      * PdoDriver constructor.
      * @param \PDO $pdo
+     * @param string $table
      */
-    public function __construct(\PDO $pdo)
+    public function __construct(\PDO $pdo, $table = 'translations')
     {
         $this->pdo = $pdo;
+        $this->table = $table;
     }
 
     /**
@@ -54,7 +61,7 @@ class PdoDriver implements DriverInterface
     public function findTranslation($locale, $key, $domain = null)
     {
         $bindings = [':locale' => $locale, ':key' => $key];
-        $sql = 'SELECT * FROM translations WHERE locale = :locale AND key = :key ';
+        $sql = 'SELECT * FROM ' . $this->getPdo()->quote($this->table) . ' WHERE locale = :locale AND key = :key ';
 
         if ($domain) {
             $sql .= ' AND domain = :domain ';
@@ -89,7 +96,7 @@ class PdoDriver implements DriverInterface
             $locale
         ];
 
-        $sql = 'SELECT * FROM translations WHERE locale = ? ';
+        $sql = 'SELECT * FROM ' . $this->getPdo()->quote($this->table) . ' WHERE locale = ? ';
 
         if ($domain) {
             $sql .= ' AND domain = ? ';
@@ -126,7 +133,7 @@ class PdoDriver implements DriverInterface
             ':content' => $content
         ];
 
-        $sql = 'UPDATE translations SET content = :content WHERE locale = :locale AND key = :key ';
+        $sql = 'UPDATE ' . $this->getPdo()->quote($this->table) . ' SET content = :content WHERE locale = :locale AND key = :key ';
 
         if ($domain) {
             $sql .= ' AND domain = :domain;';
@@ -159,7 +166,7 @@ class PdoDriver implements DriverInterface
             'content' => $content
         ];
 
-        $sql = 'INSERT INTO translations (locale, key, domain, content) VALUES (:locale, :key, :domain, :content);';
+        $sql = 'INSERT INTO ' . $this->getPdo()->quote($this->table) . ' (locale, key, domain, content) VALUES (:locale, :key, :domain, :content);';
         $stmt = $this->pdo->prepare($sql);
         $success = $stmt->execute($bindings);
 
@@ -203,7 +210,8 @@ class PdoDriver implements DriverInterface
             ':key' => $key
         ];
 
-        $sql = 'DELETE FROM translations WHERE locale = :locale AND key = :key ';
+        $sql = 'DELETE FROM ' . $this->getPdo()->quote($this->table) . ' WHERE locale = :locale AND key = :key ';
+
         if ($domain) {
             $sql .= ' AND domain = :domain ;';
             $bindings[':domain'] = $domain;

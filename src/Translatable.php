@@ -10,6 +10,7 @@ namespace bkanber\Translator;
  *
  * Simple class that represents a "translation key" in a string.
  * Translatables are found and created by the Parser classes, in order to keep track of what needs to be replaced.
+ * At present this class is not much more than a 'struct'.
  */
 class Translatable
 {
