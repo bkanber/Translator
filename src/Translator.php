@@ -5,6 +5,7 @@ namespace bkanber\Translator;
 
 use bkanber\Translator\Driver\DriverInterface;
 use bkanber\Translator\Exception\DriverMissingException;
+use bkanber\Translator\Handler\HandlerInterface;
 use bkanber\Translator\Parser\ParserInterface;
 use bkanber\Translator\Parser\StringParser;
 
@@ -42,6 +43,9 @@ class Translator
     /** @var DriverInterface */
     protected $driver;
 
+    /** @var HandlerInterface */
+    protected $handler;
+
     /**
      * Singleton instance manager.
      *
@@ -68,6 +72,25 @@ class Translator
         $this->driver = $driver;
     }
 
+
+
+    /**
+     * @return HandlerInterface
+     */
+    public function getHandler()
+    {
+        return $this->handler;
+    }
+
+    /**
+     * @param HandlerInterface $handler
+     * @return Translator
+     */
+    public function setHandler($handler)
+    {
+        $this->handler = $handler;
+        return $this;
+    }
 
     /**
      * @return string
@@ -143,6 +166,10 @@ class Translator
         $translationKeys = $parser->getTranslatableKeys();
         $translations = $this->getDriver()->findTranslations($this->getLocale(), $translationKeys, $this->getDomain());
 
+        if ($this->getHandler()) {
+            $this->logMissingTranslationsToHandler($translatables, $translations);
+        }
+
         return $parser->replace($translations);
     }
 
@@ -177,5 +204,28 @@ class Translator
 
         return $input;
 
+    }
+
+    /**
+     * @param array|Translatable[] $translatables
+     * @param array|Translation[] $translations
+     */
+    protected function logMissingTranslationsToHandler(array $translatables, array $translations)
+    {
+        if (!$this->getHandler()) {
+            return;
+        }
+
+        $translationMap = [];
+
+        foreach ($translations as $translation) {
+            $translationMap[$translation->getKey()] = $translation;
+        }
+
+        foreach ($translatables as $translatable) {
+            if (!isset($translationMap[$translatable->getKey()])) {
+                $this->getHandler()->onMissingTranslation($translatable, $this);
+            }
+        }
     }
 }
